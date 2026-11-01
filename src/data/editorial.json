@@ -1,0 +1,30 @@
+{
+  "_note": "DEMO ana sayfa seçkisi. Shopify modunda bu içerik 'asrin_home' metaobject'inden okunur (docs/SHOPIFY.md).",
+  "heroProductHandles": [
+    "abdulmecid-5-kurus-1255-21-r-gumus-kondisyon-ct-tek-nadir",
+    "1-emisyon-10-lira-1-tertip-pik-p-121-yil-1927-kondisyon-10-6-5-1",
+    "v-mehmed-resad-5-kurus-1327-1-gumus-kondisyon-cil-alti"
+  ],
+  "featuredCategoryHandles": [
+    "t-c-kagit-paralar",
+    "t-c-madeni-paralar",
+    "t-c-hatira-paralar",
+    "osmanli-paralari",
+    "yabanci-paralar",
+    "sertifikali-paralar",
+    "koleksiyon-malzemeleri"
+  ],
+  "categoryImageHandles": {
+    "t-c-kagit-paralar": "5-emisyon-5-lira-1-tertip-pik-154-yil-1952-kondisyon-10-7-5",
+    "t-c-hatira-paralar": "1937-ata-1-lira-gumus-kondisyon-10-8",
+    "osmanli-paralari": "abdulmecid-5-kurus-1255-21-r-gumus-kondisyon-ct-tek-nadir",
+    "yabanci-paralar": "fransa-5-francs-1943-pkare98b-kondisyon-10-10",
+    "sertifikali-paralar": "2-emisyon-50-kurus-pik-p-134-yil-1944-47-kondisyon-pmg45",
+    "koleksiyon-malzemeleri": "lion-marka-372-gozlu-metal-para-albumu-siyah-renk-sifir-urun"
+  },
+  "ottomanFeatureCategory": "osmanli-paralari",
+  "ottomanFeatureProduct": "v-mehmed-resad-5-kurus-1327-1-gumus-kondisyon-cil-alti",
+  "foreignFeatureCategory": "yabanci-paralar",
+  "foreignFeatureProducts": ["fransa-5-francs-1943-pkare98b-kondisyon-10-10", "almanya-10-mark-1970-pkare31a-kondisyon-10-10", "luksemburg-100-francs-1968-pkare14-kondisyon-10-10"],
+  "antiqueCategory": "antika"
+}

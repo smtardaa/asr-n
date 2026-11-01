@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import type { Category, Product } from '../lib/data/types';
+import type { PageCtx } from '../lib/page';
+import { alternatesFor } from '../i18n';
+
+interface Props { ctx: PageCtx; categories: Category[]; products: Product[] }
+const { ctx, categories } = Astro.props;
+const { t } = ctx;
+const seo = { title: t.seo.favorites, description: t.meta.defaultDescription, path: ctx.path('favorites'), alternates: alternatesFor('favorites'), noindex: true };
+const cardStrings = { sold: t.product.sold, isNew: t.product.new, favAdd: t.favorites.add, addToCart: t.product.addToCart, inStock: t.product.inStock };
+---
+<Base ctx={ctx} seo={seo} categories={categories} routeKey="favorites" languageLinks={alternatesFor('favorites')}>
+  <Breadcrumbs items={[{ name: t.ui.home, href: ctx.path('home') }, { name: t.favorites.title }]} label={t.a11y.breadcrumb} />
+  <div class="container" style="padding-bottom:64px" data-favorites-page>
+    <header class="page-head"><h1>{t.favorites.title}</h1><p>{t.favorites.note}</p></header>
+    <noscript><p class="notice notice-info">{t.cart.noscript}</p></noscript>
+    <div data-favorites-list aria-live="polite"></div>
+    <div class="empty" data-fav-empty hidden><h2>{t.favorites.empty}</h2><a class="btn btn-primary" href={ctx.path('products')}>{t.nav.allProducts}</a></div>
+    <script type="application/json" id="card-strings" set:html={JSON.stringify(cardStrings)} />
+  </div>
+</Base>

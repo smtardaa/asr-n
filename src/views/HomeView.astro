@@ -1,0 +1,155 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Icon from '../components/Icon.astro';
+import { categoryTitle } from '../lib/data';
+import type { Category, Product } from '../lib/data/types';
+import { productMeta, type PageCtx } from '../lib/page';
+import { makeLabels } from '../lib/labels';
+import { alternatesFor } from '../i18n';
+import { siteLd } from '../lib/seo';
+
+interface Props {
+  ctx: PageCtx;
+  categories: Category[];
+  hero: Product[];
+  strip: Array<{ category: Category; image?: Product['images'][number]; round: boolean }>;
+  tabs: { all: Product[]; banknote: Product[]; coin: Product[]; certified: Product[] };
+  ottoman?: Product;
+  foreign: Product[];
+  ottomanCategory?: Category;
+  foreignCategory?: Category;
+  antiqueCategory?: Category;
+}
+const { ctx, categories, hero, strip, tabs, ottoman, foreign, ottomanCategory, foreignCategory, antiqueCategory } = Astro.props;
+const { t, locale } = ctx;
+const labels = makeLabels(locale, categories);
+const meta = (p: Product) => productMeta(p, ctx, labels.country);
+// Sekme kümesi: tekrarsız birleşim; her kart hangi sekmelerde görüneceğini data-tabs ile taşır
+const union = new Map<string, { p: Product; tabs: string[] }>();
+(Object.entries(tabs) as Array<[string, Product[]]>).forEach(([k, list]) => list.forEach((p) => {
+  const e = union.get(p.handle) ?? { p, tabs: [] };
+  e.tabs.push(k);
+  union.set(p.handle, e);
+}));
+const tabKeys = [
+  ['all', t.home.tabAll], ['banknote', t.home.tabBanknote], ['coin', t.home.tabCoin], ['certified', t.home.tabCertified],
+] as const;
+const [note, coinA, coinB] = [hero[1], hero[0], hero[2]];
+const img = (p?: Product, i = 0) => p?.images[i];
+const seo = {
+  title: t.meta.homeTitle,
+  description: t.meta.defaultDescription,
+  path: ctx.path('home'),
+  alternates: alternatesFor('home'),
+  jsonLd: siteLd(ctx.env, locale, ctx.path('search')),
+};
+---
+<Base ctx={ctx} seo={seo} categories={categories} routeKey="home" languageLinks={alternatesFor('home')}>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container hero-inner">
+      <div>
+        <span class="eyebrow reveal">{t.hero.eyebrow}</span>
+        <h1 id="hero-title" class="reveal reveal-2">
+          <span class="line">{t.hero.line1}</span>
+          <span class="line">{t.hero.line2}</span>
+          <span class="gold">{t.hero.line3}</span>
+        </h1>
+        <p class="hero-text reveal reveal-3">{t.hero.text}</p>
+        <div class="hero-cta reveal reveal-4">
+          <a class="btn btn-gold" href={ctx.path('products')}>{t.hero.ctaPrimary}<Icon name="arrow" /></a>
+          <a class="btn btn-outline-gold" href={ctx.path('new')}>{t.hero.ctaSecondary}</a>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        {img(note) && <img class="note" src={img(note)!.url} width={img(note)!.width} height={img(note)!.height} alt="" fetchpriority="high" decoding="async" />}
+        {img(coinA) && <img class="coin coin-a" src={img(coinA)!.url} width={img(coinA)!.width} height={img(coinA)!.height} alt="" decoding="async" />}
+        {img(coinB) && <img class="coin coin-b" src={img(coinB)!.thumbUrl ?? img(coinB)!.url} width="320" height="320" alt="" decoding="async" />}
+      </div>
+    </div>
+    <p class="hero-badge" aria-hidden="true">{t.hero.badge}</p>
+  </section>
+
+  <nav class="cat-strip" aria-label={t.home.categoriesTitle}>
+    <ul class="container">
+      {strip.map(({ category, image, round }) => (
+        <li>
+          <a href={ctx.path('category', category.handle)}>
+            <span class="thumb">
+              {image ? <img class:list={{ round }} src={image.thumbUrl ?? image.url} width="160" height={Math.round(160 * image.height / image.width)} alt="" loading="lazy" decoding="async" />
+                : <Icon name="vase" />}
+            </span>
+            <span class="label">{categoryTitle(category, locale)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <section class="section surface-light" aria-labelledby="new-title">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="section-eyebrow">{t.home.newEyebrow}</span>
+          <h2 class="section-title" id="new-title">{t.home.newTitle}</h2>
+        </div>
+        <a class="link-arrow" href={ctx.path('products')}>{t.home.viewAll}<Icon name="arrow" /></a>
+      </div>
+      <div class="tabs" role="tablist" aria-label={t.home.newTitle} data-home-tabs>
+        {tabKeys.map(([k, label], i) => (
+          <button class="tab" type="button" role="tab" id={`tab-${k}`} aria-selected={i === 0 ? 'true' : 'false'} aria-controls="new-grid" tabindex={i === 0 ? 0 : -1} data-tab={k}>{label}</button>
+        ))}
+      </div>
+      {ctx.env.showDemoNotice && <p class="muted">{t.home.demoSamples}</p>}
+      <ul class="grid" id="new-grid" role="tabpanel" aria-labelledby="tab-all" style="margin-top:12px">
+        {[...union.values()].map(({ p, tabs: ts }) => (
+          <li data-tabs={ts.join(' ')} hidden={!ts.includes('all') || tabs.all.indexOf(p) >= 8}>
+            <ProductCard ctx={ctx} product={p} meta={meta(p)} />
+          </li>
+        ))}
+      </ul>
+      {ctx.rateNote && <p class="rate-note">{ctx.rateNote}</p>}
+    </div>
+  </section>
+
+  <section class="features" aria-label={t.home.otherCollections}>
+    {ottomanCategory && (
+      <div class="feature feature-ottoman">
+        {ottoman?.images[0] && <div class="feature-art" aria-hidden="true"><img src={ottoman.images[0].url} width={ottoman.images[0].width} height={ottoman.images[0].height} alt="" loading="lazy" decoding="async" /></div>}
+        <div>
+          <span class="eyebrow">{t.home.ottomanEyebrow}</span>
+          <h2>{t.home.ottomanTitle}</h2>
+          <a class="btn btn-outline-gold" href={ctx.path('category', ottomanCategory.handle)}>{t.home.ottomanCta}<Icon name="arrow" /></a>
+        </div>
+      </div>
+    )}
+    {foreignCategory && (
+      <div class="feature feature-foreign">
+        <div class="feature-notes" aria-hidden="true">
+          {foreign.slice(0, 3).map((p) => p.images[0] && <img src={p.images[0].thumbUrl ?? p.images[0].url} width="320" height={Math.round(320 * p.images[0].height / p.images[0].width)} alt="" loading="lazy" decoding="async" />)}
+        </div>
+        <div>
+          <span class="eyebrow">{categoryTitle(foreignCategory, locale)}</span>
+          <h2>{t.home.foreignTitle}</h2>
+          <a class="link-arrow" href={ctx.path('category', foreignCategory.handle)}>{t.home.foreignCta}<Icon name="arrow" /></a>
+        </div>
+      </div>
+    )}
+  </section>
+
+  {antiqueCategory && (
+    <section class="section" aria-labelledby="antique-title" style="padding-top:28px">
+      <div class="container">
+        <div class="antique">
+          <span class="antique-emblem"><Icon name="vase" /></span>
+          <div>
+            <span class="section-eyebrow">{t.home.antiqueEyebrow}</span>
+            <h2 id="antique-title">{categoryTitle(antiqueCategory, locale)}</h2>
+            <p>{antiqueCategory.productCount > 0 ? '' : t.home.antiqueText}</p>
+          </div>
+          <a class="btn btn-outline" href={ctx.path('category', antiqueCategory.handle)}>{t.home.antiqueCta}</a>
+        </div>
+      </div>
+    </section>
+  )}
+</Base>

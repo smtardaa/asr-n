@@ -1,0 +1,974 @@
+{
+ "afghanis": {
+  "tr": "Afghanis",
+  "en": "Afghanis",
+  "ja": "アフガニ",
+  "ru": "афгани"
+ },
+ "apsar": {
+  "tr": "Apsar",
+  "en": "Apsar",
+  "ja": "アプサル",
+  "ru": "апсаров"
+ },
+ "ariary": {
+  "tr": "Ariary",
+  "en": "Ariary",
+  "ja": "アリアリ",
+  "ru": "ариари"
+ },
+ "australes": {
+  "tr": "Australes",
+  "en": "Australes",
+  "ja": "アウストラル",
+  "ru": "аустралей"
+ },
+ "baht": {
+  "tr": "Baht",
+  "en": "Baht",
+  "ja": "バーツ",
+  "ru": "батов"
+ },
+ "birr": {
+  "tr": "Birr",
+  "en": "Birr",
+  "ja": "ブル",
+  "ru": "быр"
+ },
+ "bolivares": {
+  "tr": "Bolivares",
+  "en": "Bolivares",
+  "ja": "ボリバル",
+  "ru": "боливаров"
+ },
+ "bolivianos": {
+  "tr": "Bolivianos",
+  "en": "Bolivianos",
+  "ja": "ボリビアーノ",
+  "ru": "боливиано"
+ },
+ "cedis": {
+  "tr": "Cedis",
+  "en": "Cedis",
+  "ja": "セディ",
+  "ru": "седи"
+ },
+ "centauru": {
+  "tr": "Centu",
+  "en": "Centu",
+  "ja": "セント",
+  "ru": "центов"
+ },
+ "centavos": {
+  "tr": "Centavos",
+  "en": "Centavos",
+  "ja": "センタボ",
+  "ru": "сентаво"
+ },
+ "centesimos": {
+  "tr": "Centesimos",
+  "en": "Centesimos",
+  "ja": "センテシモ",
+  "ru": "сентесимо"
+ },
+ "centimes": {
+  "tr": "Centimes",
+  "en": "Centimes",
+  "ja": "サンチーム",
+  "ru": "сантимов"
+ },
+ "cents": {
+  "tr": "Cents",
+  "en": "Cents",
+  "ja": "セント",
+  "ru": "центов"
+ },
+ "colon": {
+  "tr": "Colon",
+  "en": "Colon",
+  "ja": "コロン",
+  "ru": "колон"
+ },
+ "colones": {
+  "tr": "Colones",
+  "en": "Colones",
+  "ja": "コロン",
+  "ru": "колонов"
+ },
+ "convertiple": {
+  "tr": "Convertible Marka",
+  "en": "Convertible Marka",
+  "ja": "兌換マルク",
+  "ru": "конвертируемых марок"
+ },
+ "convertiple maraka": {
+  "tr": "Convertible Marka",
+  "en": "Convertible Marka",
+  "ja": "兌換マルク",
+  "ru": "конвертируемых марок"
+ },
+ "corbada": {
+  "tr": "Cordoba",
+  "en": "Cordoba",
+  "ja": "コルドバ",
+  "ru": "кордобы"
+ },
+ "cordabas": {
+  "tr": "Cordobas",
+  "en": "Cordobas",
+  "ja": "コルドバ",
+  "ru": "кордоб"
+ },
+ "cordobas": {
+  "tr": "Cordobas",
+  "en": "Cordobas",
+  "ja": "コルドバ",
+  "ru": "кордоб"
+ },
+ "cruzados": {
+  "tr": "Cruzados",
+  "en": "Cruzados",
+  "ja": "クルザード",
+  "ru": "крузадо"
+ },
+ "cruzeiro": {
+  "tr": "Cruzeiro",
+  "en": "Cruzeiro",
+  "ja": "クルゼイロ",
+  "ru": "крузейро"
+ },
+ "cruzeiros": {
+  "tr": "Cruzeiros",
+  "en": "Cruzeiros",
+  "ja": "クルゼイロ",
+  "ru": "крузейро"
+ },
+ "dalasi": {
+  "tr": "Dalasi",
+  "en": "Dalasi",
+  "ja": "ダラシ",
+  "ru": "даласи"
+ },
+ "dalasis": {
+  "tr": "Dalasis",
+  "en": "Dalasis",
+  "ja": "ダラシ",
+  "ru": "даласи"
+ },
+ "dinar": {
+  "tr": "Dinar",
+  "en": "Dinar",
+  "ja": "ディナール",
+  "ru": "динаров"
+ },
+ "dinara": {
+  "tr": "Dinara",
+  "en": "Dinara",
+  "ja": "ディナール",
+  "ru": "динаров"
+ },
+ "dinars": {
+  "tr": "Dinars",
+  "en": "Dinars",
+  "ja": "ディナール",
+  "ru": "динаров"
+ },
+ "dirhams": {
+  "tr": "Dirhams",
+  "en": "Dirhams",
+  "ja": "ディルハム",
+  "ru": "дирхамов"
+ },
+ "dobras": {
+  "tr": "Dobras",
+  "en": "Dobras",
+  "ja": "ドブラ",
+  "ru": "добр"
+ },
+ "dolar": {
+  "tr": "Dollars",
+  "en": "Dollars",
+  "ja": "ドル",
+  "ru": "долларов"
+ },
+ "dolars": {
+  "tr": "Dollars",
+  "en": "Dollars",
+  "ja": "ドル",
+  "ru": "долларов"
+ },
+ "dollar": {
+  "tr": "Dollar",
+  "en": "Dollar",
+  "ja": "ドル",
+  "ru": "доллар"
+ },
+ "dollars": {
+  "tr": "Dollars",
+  "en": "Dollars",
+  "ja": "ドル",
+  "ru": "долларов"
+ },
+ "dong": {
+  "tr": "Dong",
+  "en": "Dong",
+  "ja": "ドン",
+  "ru": "донгов"
+ },
+ "drachmai": {
+  "tr": "Drachmai",
+  "en": "Drachmai",
+  "ja": "ドラクマ",
+  "ru": "драхм"
+ },
+ "emalangeni": {
+  "tr": "Emalangeni",
+  "en": "Emalangeni",
+  "ja": "リランゲニ",
+  "ru": "эмалангени"
+ },
+ "escudo": {
+  "tr": "Escudo",
+  "en": "Escudo",
+  "ja": "エスクード",
+  "ru": "эскудо"
+ },
+ "escudos": {
+  "tr": "Escudos",
+  "en": "Escudos",
+  "ja": "エスクード",
+  "ru": "эскудо"
+ },
+ "fen": {
+  "tr": "Fen",
+  "en": "Fen",
+  "ja": "分",
+  "ru": "фэней"
+ },
+ "florin": {
+  "tr": "Florin",
+  "en": "Florin",
+  "ja": "フロリン",
+  "ru": "флоринов"
+ },
+ "franc": {
+  "tr": "Franc",
+  "en": "Franc",
+  "ja": "フラン",
+  "ru": "франк"
+ },
+ "francs": {
+  "tr": "Francs",
+  "en": "Francs",
+  "ja": "フラン",
+  "ru": "франков"
+ },
+ "frank": {
+  "tr": "Franken",
+  "en": "Franken",
+  "ja": "フラン",
+  "ru": "франков"
+ },
+ "gourde": {
+  "tr": "Gourde",
+  "en": "Gourde",
+  "ja": "グールド",
+  "ru": "гурд"
+ },
+ "gourdes": {
+  "tr": "Gourdes",
+  "en": "Gourdes",
+  "ja": "グールド",
+  "ru": "гурдов"
+ },
+ "grivnia": {
+  "tr": "Hryvnia",
+  "en": "Hryvnia",
+  "ja": "フリヴニャ",
+  "ru": "гривен"
+ },
+ "guaranies": {
+  "tr": "Guaranies",
+  "en": "Guaranies",
+  "ja": "グアラニー",
+  "ru": "гуарани"
+ },
+ "gulden": {
+  "tr": "Gulden",
+  "en": "Gulden",
+  "ja": "ギルダー",
+  "ru": "гульденов"
+ },
+ "hao": {
+  "tr": "Hao",
+  "en": "Hao",
+  "ja": "ハオ",
+  "ru": "хао"
+ },
+ "hyrven": {
+  "tr": "Hryven",
+  "en": "Hryven",
+  "ja": "フリヴニャ",
+  "ru": "гривен"
+ },
+ "intis": {
+  "tr": "Intis",
+  "en": "Intis",
+  "ja": "インティ",
+  "ru": "инти"
+ },
+ "jiao": {
+  "tr": "Jiao",
+  "en": "Jiao",
+  "ja": "角",
+  "ru": "цзяо"
+ },
+ "karbovantsiv": {
+  "tr": "Karbovantsiv",
+  "en": "Karbovantsiv",
+  "ja": "カルボヴァネツ",
+  "ru": "карбованцев"
+ },
+ "kayt": {
+  "tr": "Kyat",
+  "en": "Kyat",
+  "ja": "チャット",
+  "ru": "кьят"
+ },
+ "kina": {
+  "tr": "Kina",
+  "en": "Kina",
+  "ja": "キナ",
+  "ru": "кин"
+ },
+ "kip": {
+  "tr": "Kip",
+  "en": "Kip",
+  "ja": "キープ",
+  "ru": "кип"
+ },
+ "kolon": {
+  "tr": "Colon",
+  "en": "Colon",
+  "ja": "コロン",
+  "ru": "колон"
+ },
+ "korun": {
+  "tr": "Korun",
+  "en": "Korun",
+  "ja": "コルナ",
+  "ru": "крон"
+ },
+ "kronen": {
+  "tr": "Kronen",
+  "en": "Kronen",
+  "ja": "クローネ",
+  "ru": "крон"
+ },
+ "kroner": {
+  "tr": "Kroner",
+  "en": "Kroner",
+  "ja": "クローネ",
+  "ru": "крон"
+ },
+ "kronor": {
+  "tr": "Kronor",
+  "en": "Kronor",
+  "ja": "クローナ",
+  "ru": "крон"
+ },
+ "kronur": {
+  "tr": "Kronur",
+  "en": "Kronur",
+  "ja": "クローナ",
+  "ru": "крон"
+ },
+ "krooni": {
+  "tr": "Krooni",
+  "en": "Krooni",
+  "ja": "クローン",
+  "ru": "крон"
+ },
+ "kuna": {
+  "tr": "Kuna",
+  "en": "Kuna",
+  "ja": "クーナ",
+  "ru": "кун"
+ },
+ "kurus": {
+  "tr": "Kuruş",
+  "en": "Kurus",
+  "ja": "クルシュ",
+  "ru": "курушей"
+ },
+ "kwacha": {
+  "tr": "Kwacha",
+  "en": "Kwacha",
+  "ja": "クワチャ",
+  "ru": "квача"
+ },
+ "kwanzas": {
+  "tr": "Kwanzas",
+  "en": "Kwanzas",
+  "ja": "クワンザ",
+  "ru": "кванз"
+ },
+ "kyats": {
+  "tr": "Kyats",
+  "en": "Kyats",
+  "ja": "チャット",
+  "ru": "кьятов"
+ },
+ "lari": {
+  "tr": "Lari",
+  "en": "Lari",
+  "ja": "ラリ",
+  "ru": "лари"
+ },
+ "laris": {
+  "tr": "Lari",
+  "en": "Lari",
+  "ja": "ラリ",
+  "ru": "лари"
+ },
+ "lati": {
+  "tr": "Lati",
+  "en": "Lati",
+  "ja": "ラッツ",
+  "ru": "латов"
+ },
+ "lei": {
+  "tr": "Lei",
+  "en": "Lei",
+  "ja": "レウ",
+  "ru": "леев"
+ },
+ "leke": {
+  "tr": "Leke",
+  "en": "Leke",
+  "ja": "レク",
+  "ru": "леков"
+ },
+ "lempira": {
+  "tr": "Lempira",
+  "en": "Lempira",
+  "ja": "レンピラ",
+  "ru": "лемпир"
+ },
+ "lempiras": {
+  "tr": "Lempiras",
+  "en": "Lempiras",
+  "ja": "レンピラ",
+  "ru": "лемпир"
+ },
+ "leones": {
+  "tr": "Leones",
+  "en": "Leones",
+  "ja": "レオン",
+  "ru": "леоне"
+ },
+ "leu": {
+  "tr": "Leu",
+  "en": "Leu",
+  "ja": "レウ",
+  "ru": "лей"
+ },
+ "leva": {
+  "tr": "Leva",
+  "en": "Leva",
+  "ja": "レフ",
+  "ru": "левов"
+ },
+ "lilangeni": {
+  "tr": "Lilangeni",
+  "en": "Lilangeni",
+  "ja": "リランゲニ",
+  "ru": "лилангени"
+ },
+ "lira": {
+  "tr": "Lira",
+  "en": "Lira",
+  "ja": "リラ",
+  "ru": "лир"
+ },
+ "lire": {
+  "tr": "Lire",
+  "en": "Lire",
+  "ja": "リラ",
+  "ru": "лир"
+ },
+ "liret": {
+  "tr": "Lire",
+  "en": "Lire",
+  "ja": "リラ",
+  "ru": "лир"
+ },
+ "liri": {
+  "tr": "Liri",
+  "en": "Liri",
+  "ja": "リラ",
+  "ru": "лиры"
+ },
+ "lirot": {
+  "tr": "Lirot",
+  "en": "Lirot",
+  "ja": "リロット",
+  "ru": "лирот"
+ },
+ "litai": {
+  "tr": "Litai",
+  "en": "Litai",
+  "ja": "リタス",
+  "ru": "литов"
+ },
+ "litaurai": {
+  "tr": "Litai",
+  "en": "Litai",
+  "ja": "リタス",
+  "ru": "лита"
+ },
+ "litauras": {
+  "tr": "Litas",
+  "en": "Litas",
+  "ja": "リタス",
+  "ru": "лит"
+ },
+ "litauru": {
+  "tr": "Litu",
+  "en": "Litu",
+  "ja": "リタス",
+  "ru": "литов"
+ },
+ "litu": {
+  "tr": "Litu",
+  "en": "Litu",
+  "ja": "リタス",
+  "ru": "литов"
+ },
+ "livre": {
+  "tr": "Livres",
+  "en": "Livres",
+  "ja": "リーブル",
+  "ru": "ливров"
+ },
+ "makuta": {
+  "tr": "Makuta",
+  "en": "Makuta",
+  "ja": "マクタ",
+  "ru": "макут"
+ },
+ "maloti": {
+  "tr": "Maloti",
+  "en": "Maloti",
+  "ja": "ロチ",
+  "ru": "малоти"
+ },
+ "manat": {
+  "tr": "Manat",
+  "en": "Manat",
+  "ja": "マナト",
+  "ru": "манат"
+ },
+ "mark": {
+  "tr": "Mark",
+  "en": "Mark",
+  "ja": "マルク",
+  "ru": "марок"
+ },
+ "markka": {
+  "tr": "Markka",
+  "en": "Markka",
+  "ja": "マルッカ",
+  "ru": "марок"
+ },
+ "meticais": {
+  "tr": "Meticais",
+  "en": "Meticais",
+  "ja": "メティカル",
+  "ru": "метикалов"
+ },
+ "naira": {
+  "tr": "Naira",
+  "en": "Naira",
+  "ja": "ナイラ",
+  "ru": "найр"
+ },
+ "nakfa": {
+  "tr": "Nakfa",
+  "en": "Nakfa",
+  "ja": "ナクファ",
+  "ru": "накф"
+ },
+ "niara": {
+  "tr": "Naira",
+  "en": "Naira",
+  "ja": "ナイラ",
+  "ru": "найр"
+ },
+ "nuevos pesos": {
+  "tr": "Nuevos Pesos",
+  "en": "Nuevos Pesos",
+  "ja": "新ペソ",
+  "ru": "новых песо"
+ },
+ "ouguiya": {
+  "tr": "Ouguiya",
+  "en": "Ouguiya",
+  "ja": "ウギア",
+  "ru": "угий"
+ },
+ "para": {
+  "tr": "Para",
+  "en": "Para",
+  "ja": "パラ",
+  "ru": "пара"
+ },
+ "patacas": {
+  "tr": "Patacas",
+  "en": "Patacas",
+  "ja": "パタカ",
+  "ru": "патак"
+ },
+ "paund": {
+  "tr": "Pounds",
+  "en": "Pounds",
+  "ja": "ポンド",
+  "ru": "фунтов"
+ },
+ "paunds": {
+  "tr": "Pounds",
+  "en": "Pounds",
+  "ja": "ポンド",
+  "ru": "фунтов"
+ },
+ "peseta": {
+  "tr": "Peseta",
+  "en": "Peseta",
+  "ja": "ペセタ",
+  "ru": "песета"
+ },
+ "pesetas": {
+  "tr": "Pesetas",
+  "en": "Pesetas",
+  "ja": "ペセタ",
+  "ru": "песет"
+ },
+ "peso": {
+  "tr": "Peso",
+  "en": "Peso",
+  "ja": "ペソ",
+  "ru": "песо"
+ },
+ "pesos": {
+  "tr": "Pesos",
+  "en": "Pesos",
+  "ja": "ペソ",
+  "ru": "песо"
+ },
+ "piastre": {
+  "tr": "Piastre",
+  "en": "Piastre",
+  "ja": "ピアストル",
+  "ru": "пиастр"
+ },
+ "piastres": {
+  "tr": "Piastres",
+  "en": "Piastres",
+  "ja": "ピアストル",
+  "ru": "пиастров"
+ },
+ "piso": {
+  "tr": "Piso",
+  "en": "Piso",
+  "ja": "ペソ",
+  "ru": "писо"
+ },
+ "pound": {
+  "tr": "Pound",
+  "en": "Pound",
+  "ja": "ポンド",
+  "ru": "фунт"
+ },
+ "pounds": {
+  "tr": "Pounds",
+  "en": "Pounds",
+  "ja": "ポンド",
+  "ru": "фунтов"
+ },
+ "pula": {
+  "tr": "Pula",
+  "en": "Pula",
+  "ja": "プラ",
+  "ru": "пул"
+ },
+ "quetzal": {
+  "tr": "Quetzal",
+  "en": "Quetzal",
+  "ja": "ケツァル",
+  "ru": "кетсаль"
+ },
+ "rand": {
+  "tr": "Rand",
+  "en": "Rand",
+  "ja": "ランド",
+  "ru": "рэндов"
+ },
+ "rial": {
+  "tr": "Rial",
+  "en": "Rial",
+  "ja": "リアル",
+  "ru": "риала"
+ },
+ "rials": {
+  "tr": "Rials",
+  "en": "Rials",
+  "ja": "リアル",
+  "ru": "риалов"
+ },
+ "riel": {
+  "tr": "Riel",
+  "en": "Riel",
+  "ja": "リエル",
+  "ru": "риель"
+ },
+ "riels": {
+  "tr": "Riels",
+  "en": "Riels",
+  "ja": "リエル",
+  "ru": "риелей"
+ },
+ "ringgit": {
+  "tr": "Ringgit",
+  "en": "Ringgit",
+  "ja": "リンギット",
+  "ru": "ринггитов"
+ },
+ "riyal": {
+  "tr": "Riyal",
+  "en": "Riyal",
+  "ja": "リヤル",
+  "ru": "риалов"
+ },
+ "riyals": {
+  "tr": "Riyals",
+  "en": "Riyals",
+  "ja": "リヤル",
+  "ru": "риалов"
+ },
+ "ruble": {
+  "tr": "Ruble",
+  "en": "Ruble",
+  "ja": "ルーブル",
+  "ru": "рубль"
+ },
+ "rublei": {
+  "tr": "Rublei",
+  "en": "Rublei",
+  "ja": "ルーブル",
+  "ru": "рублей"
+ },
+ "rubles": {
+  "tr": "Rubles",
+  "en": "Rubles",
+  "ja": "ルーブル",
+  "ru": "рублей"
+ },
+ "rubli": {
+  "tr": "Rubli",
+  "en": "Rubli",
+  "ja": "ルーブル",
+  "ru": "рублей"
+ },
+ "rufiyaa": {
+  "tr": "Rufiyaa",
+  "en": "Rufiyaa",
+  "ja": "ルフィヤ",
+  "ru": "руфий"
+ },
+ "rupees": {
+  "tr": "Rupees",
+  "en": "Rupees",
+  "ja": "ルピー",
+  "ru": "рупий"
+ },
+ "rupi": {
+  "tr": "Rupee",
+  "en": "Rupee",
+  "ja": "ルピー",
+  "ru": "рупия"
+ },
+ "rupiah": {
+  "tr": "Rupiah",
+  "en": "Rupiah",
+  "ja": "ルピア",
+  "ru": "рупий"
+ },
+ "schilling": {
+  "tr": "Schilling",
+  "en": "Schilling",
+  "ja": "シリング",
+  "ru": "шиллингов"
+ },
+ "sheqalim": {
+  "tr": "Sheqalim",
+  "en": "Sheqalim",
+  "ja": "シェケル",
+  "ru": "шекелей"
+ },
+ "shilin": {
+  "tr": "Shilin",
+  "en": "Shilin",
+  "ja": "シリング",
+  "ru": "шиллингов"
+ },
+ "shillin": {
+  "tr": "Shillin",
+  "en": "Shillin",
+  "ja": "シリング",
+  "ru": "шиллингов"
+ },
+ "shillingi": {
+  "tr": "Shilingi",
+  "en": "Shilingi",
+  "ja": "シリング",
+  "ru": "шиллингов"
+ },
+ "shillings": {
+  "tr": "Shillings",
+  "en": "Shillings",
+  "ja": "シリング",
+  "ru": "шиллингов"
+ },
+ "soles": {
+  "tr": "Soles",
+  "en": "Soles",
+  "ja": "ソル",
+  "ru": "солей"
+ },
+ "som": {
+  "tr": "Som",
+  "en": "Som",
+  "ja": "ソム",
+  "ru": "сом"
+ },
+ "somoni": {
+  "tr": "Somoni",
+  "en": "Somoni",
+  "ja": "ソモニ",
+  "ru": "сомони"
+ },
+ "sucre": {
+  "tr": "Sucre",
+  "en": "Sucre",
+  "ja": "スクレ",
+  "ru": "сукре"
+ },
+ "sucres": {
+  "tr": "Sucres",
+  "en": "Sucres",
+  "ja": "スクレ",
+  "ru": "сукре"
+ },
+ "sum": {
+  "tr": "Sum",
+  "en": "Sum",
+  "ja": "スム",
+  "ru": "сумов"
+ },
+ "sylis": {
+  "tr": "Sylis",
+  "en": "Sylis",
+  "ja": "シリ",
+  "ru": "сили"
+ },
+ "taka": {
+  "tr": "Taka",
+  "en": "Taka",
+  "ja": "タカ",
+  "ru": "так"
+ },
+ "tala": {
+  "tr": "Tala",
+  "en": "Tala",
+  "ja": "タラ",
+  "ru": "тал"
+ },
+ "talonas": {
+  "tr": "Talonas",
+  "en": "Talonas",
+  "ja": "タロナス",
+  "ru": "талонасов"
+ },
+ "tambala": {
+  "tr": "Tambala",
+  "en": "Tambala",
+  "ja": "タンバラ",
+  "ru": "тамбала"
+ },
+ "tenge": {
+  "tr": "Tenge",
+  "en": "Tenge",
+  "ja": "テンゲ",
+  "ru": "тенге"
+ },
+ "tolarjev": {
+  "tr": "Tolarjev",
+  "en": "Tolarjev",
+  "ja": "トラール",
+  "ru": "толаров"
+ },
+ "tugrik": {
+  "tr": "Tugrik",
+  "en": "Tugrik",
+  "ja": "トゥグルグ",
+  "ru": "тугриков"
+ },
+ "won": {
+  "tr": "Won",
+  "en": "Won",
+  "ja": "ウォン",
+  "ru": "вон"
+ },
+ "yen": {
+  "tr": "Yen",
+  "en": "Yen",
+  "ja": "円",
+  "ru": "иен"
+ },
+ "yeni turk lirasi": {
+  "tr": "Yeni Türk Lirası",
+  "en": "New Turkish Lira",
+  "ja": "新トルコリラ",
+  "ru": "новых турецких лир"
+ },
+ "ytl": {
+  "tr": "YTL",
+  "en": "New Turkish Lira",
+  "ja": "新トルコリラ",
+  "ru": "новых турецких лир"
+ },
+ "yuan": {
+  "tr": "Yuan",
+  "en": "Yuan",
+  "ja": "元",
+  "ru": "юаней"
+ },
+ "zaire": {
+  "tr": "Zaire",
+  "en": "Zaire",
+  "ja": "ザイール",
+  "ru": "заир"
+ },
+ "zaires": {
+  "tr": "Zaires",
+  "en": "Zaires",
+  "ja": "ザイール",
+  "ru": "заиров"
+ },
+ "zlotych": {
+  "tr": "Zlotych",
+  "en": "Zlotych",
+  "ja": "ズウォティ",
+  "ru": "злотых"
+ }
+}

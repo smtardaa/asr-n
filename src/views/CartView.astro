@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import type { Category } from '../lib/data/types';
+import type { PageCtx } from '../lib/page';
+import { alternatesFor } from '../i18n';
+
+interface Props { ctx: PageCtx; categories: Category[] }
+const { ctx, categories } = Astro.props;
+const { t } = ctx;
+const isDemo = ctx.env.dataSource === 'demo';
+const strings = {
+  chargeLabel: t.cart.chargeLabel, remove: t.cart.remove, quantity: t.cart.quantity, sold: t.product.sold, warnSoldOut: t.cart.warnSoldOut, warnQty: t.cart.warnQty,
+  warnPrice: t.cart.warnPrice, warnMissing: t.cart.warnMissing, checkoutBlocked: t.cart.checkoutBlocked, checkoutError: t.cart.checkoutError,
+  redirecting: t.cart.redirecting, items: t.cart.items, errorTitle: t.errors.dataTitle, errorText: t.errors.dataText,
+};
+const seo = { title: t.seo.cart, description: t.meta.defaultDescription, path: ctx.path('cart'), alternates: alternatesFor('cart'), noindex: true };
+---
+<Base ctx={ctx} seo={seo} categories={categories} routeKey="cart" languageLinks={alternatesFor('cart')}>
+  <Breadcrumbs items={[{ name: t.ui.home, href: ctx.path('home') }, { name: t.cart.title }]} label={t.a11y.breadcrumb} />
+  <div class="container" data-cart-page data-mode={ctx.env.dataSource}>
+    <header class="page-head"><h1>{t.cart.title}</h1></header>
+    <noscript><p class="notice notice-info">{t.cart.noscript}</p></noscript>
+    <div class="cart-layout">
+      <section aria-labelledby="cart-lines-title">
+        <h2 id="cart-lines-title" class="sr-only">{t.cart.title}</h2>
+        <p class="muted" data-cart-status role="status" aria-live="polite">{t.cart.updating}</p>
+        <ul class="cart-lines" data-cart-lines></ul>
+        <div class="empty" data-cart-empty hidden>
+          <h2>{t.cart.empty}</h2>
+          <a class="btn btn-primary" href={ctx.path('products')}>{t.cart.continue}</a>
+        </div>
+      </section>
+      <aside class="summary" aria-labelledby="summary-title" data-cart-summary hidden>
+        <h2 id="summary-title">{t.cart.summary}</h2>
+        <div class="row"><span data-cart-count-text></span><span></span></div>
+        <div class="row total"><span>{t.cart.subtotal}</span><span data-cart-subtotal></span></div>
+        <p class="muted" data-cart-charge hidden style="margin:0"></p>
+        {ctx.rateNote && <p class="rate-note" style="margin:0">{ctx.rateNote}</p>}
+        {ctx.env.checkoutTryOnly && <p class="muted" style="margin:0">{t.cart.tryNote}</p>}
+        <p class="muted" style="margin:0">{t.cart.shippingNote}</p>
+        <div data-cart-alert></div>
+        {isDemo ? (
+          <div class="notice notice-info" role="note">
+            <strong>{t.cart.demoCheckoutTitle}</strong>{t.cart.demoCheckoutText}
+          </div>
+        ) : null}
+        <button class="btn btn-primary btn-block" type="button" data-checkout disabled={isDemo} aria-disabled={isDemo ? 'true' : undefined}>
+          {t.cart.checkout}
+        </button>
+        <a class="btn btn-outline btn-block" href={ctx.path('products')}>{t.cart.continue}</a>
+      </aside>
+    </div>
+    <script type="application/json" id="cart-strings" set:html={JSON.stringify(strings).replace(/</g, '\\u003c')} />
+  </div>
+</Base>

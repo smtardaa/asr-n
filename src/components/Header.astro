@@ -1,0 +1,128 @@
+---
+import { LOCALES, LOCALE_LABELS, ROOT_CATEGORY_ORDER, type Locale } from '../config/site';
+import { pathFor, withBase, type RouteKey } from '../i18n';
+import { categoryTitle } from '../lib/data';
+import type { Category } from '../lib/data/types';
+import type { PageCtx } from '../lib/page';
+import Icon from './Icon.astro';
+
+interface Props { ctx: PageCtx; categories: Category[]; routeKey: RouteKey | null; languageLinks?: Partial<Record<Locale, string>> }
+const { ctx, categories, routeKey, languageLinks } = Astro.props;
+const { t, locale } = ctx;
+const byHandle = new Map(categories.map((c) => [c.handle, c]));
+const roots = ROOT_CATEGORY_ORDER.map((h) => byHandle.get(h)).filter((c): c is Category => !!c);
+const childrenOf = (c: Category, max = 6) =>
+  c.children.map((h) => byHandle.get(h)).filter((x): x is Category => !!x)
+    .sort((a, b) => (c.handle === 'yabanci-paralar' ? b.productCount - a.productCount : a.order - b.order))
+    .slice(0, max);
+const q = ctx.url.searchParams.get('q') ?? '';
+const langHref = (l: Locale) => languageLinks?.[l] ?? pathFor(l, 'home');
+---
+<div class="topbar"><span>{t.topbar}</span></div>
+<header class="site-header" id="site-header">
+  <div class="container header-inner">
+    <button class="icon-btn menu-toggle" type="button" aria-controls="mobile-panel" aria-expanded="false" data-menu-open>
+      <Icon name="menu" /><span class="sr-only">{t.a11y.menu}</span>
+    </button>
+    <a class="brand" href={ctx.path('home')} aria-label={`${t.meta.siteName} — ${t.ui.home}`}>
+      <img src={withBase('/brand/logo-96.webp')} srcset={`${withBase('/brand/logo-96.webp')} 1x, ${withBase('/brand/logo-192.webp')} 2x`} width="62" height="62" alt="" />
+      <span class="brand-text" aria-hidden="true">
+        <span class="brand-name">ASRIN</span>
+        <span class="brand-sub">{locale === 'tr' ? 'Koleksiyon & Antika' : locale === 'ja' ? 'コレクション＆アンティーク' : locale === 'ru' ? 'Коллекции и антиквариат' : 'Collectibles & Antiques'}</span>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label={t.a11y.mainNav}>
+      <ul>
+        <li class="has-mega">
+          <button class="nav-trigger" type="button" aria-expanded="false" aria-controls="mega-menu" data-mega-trigger>
+            {t.nav.collection}<Icon name="chevron" />
+          </button>
+          <div class="mega" id="mega-menu" data-mega>
+            <div class="mega-grid">
+              {roots.map((r) => (
+                <div>
+                  <h3><a href={ctx.path('category', r.handle)}>{categoryTitle(r, locale)} {r.productCount > 0 && <span class="count">({r.productCount})</span>}</a></h3>
+                  {childrenOf(r).length > 0 && (
+                    <ul>
+                      {childrenOf(r).map((c) => <li><a href={ctx.path('category', c.handle)}>{categoryTitle(c, locale)}</a></li>)}
+                      {r.children.length > 6 && <li><a href={ctx.path('category', r.handle)}>{t.nav.viewCategory} →</a></li>}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div class="mega-foot">
+              <a href={ctx.path('products')}>{t.nav.allProducts} →</a>
+              <a href={ctx.path('sold')}>{t.nav.sold} →</a>
+            </div>
+          </div>
+        </li>
+        <li><a href={ctx.path('new')} aria-current={routeKey === 'new' ? 'page' : undefined}>{t.nav.newArrivals}</a></li>
+        <li><a href={ctx.path('category', 'antika')} aria-current={ctx.url.pathname === ctx.path('category', 'antika') ? 'page' : undefined}>{t.nav.antiques}</a></li>
+        <li><a href={ctx.path('faq')} aria-current={routeKey === 'faq' ? 'page' : undefined}>{t.nav.guide}</a></li>
+      </ul>
+    </nav>
+
+    <form class="header-search" role="search" action={ctx.path('search')} method="get">
+      <label class="sr-only" for="site-search">{t.search.label}</label>
+      <Icon name="search" class="search-icon" />
+      <input id="site-search" name="q" type="search" value={q} placeholder={t.search.placeholder} autocomplete="off" enterkeyhint="search" />
+      <button type="submit">{t.search.submit}</button>
+    </form>
+
+    <div class="header-actions">
+      <div class="lang" data-lang>
+        <button class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" data-lang-btn>
+          <Icon name="globe" /><span class="lang-label">{LOCALE_LABELS[locale]}</span><span class="sr-only">— {t.a11y.language}</span><Icon name="chevron" />
+        </button>
+        <ul class="lang-menu" id="lang-menu" hidden data-lang-menu>
+          {LOCALES.map((l) => (
+            <li><a href={langHref(l)} hreflang={l} lang={l} aria-current={l === locale ? 'true' : undefined} data-lang-option>{LOCALE_LABELS[l]}</a></li>
+          ))}
+        </ul>
+      </div>
+      <a class="icon-btn fav-link" href={ctx.path('favorites')} aria-label={t.favorites.label}>
+        <Icon name="heart" /><span class="badge-count" data-fav-count hidden>0</span>
+      </a>
+      <a class="icon-btn" href={ctx.path('cart')} aria-label={t.cart.label} data-cart-link>
+        <Icon name="cart" /><span class="badge-count" data-cart-count hidden>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-panel" id="mobile-panel" data-mobile-panel aria-hidden="true">
+  <div class="scrim" data-menu-close></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label={t.a11y.menu}>
+    <div class="sheet-head">
+      <a class="brand" href={ctx.path('home')}><img src={withBase('/brand/logo-96.webp')} width="44" height="44" alt={t.meta.siteName} /></a>
+      <button class="icon-btn" type="button" data-menu-close><Icon name="close" /><span class="sr-only">{t.a11y.closeMenu}</span></button>
+    </div>
+    <nav aria-label={t.a11y.mainNav}>
+      <ul>
+        <li><a href={ctx.path('products')}>{t.nav.allProducts}</a></li>
+        <li><a href={ctx.path('new')}>{t.nav.newArrivals}</a></li>
+        {roots.map((r) => (
+          <li>
+            {r.children.length ? (
+              <details>
+                <summary>{categoryTitle(r, locale)}</summary>
+                <ul>
+                  <li><a href={ctx.path('category', r.handle)}>{t.nav.viewCategory}</a></li>
+                  {childrenOf(r, 8).map((c) => <li><a href={ctx.path('category', c.handle)}>{categoryTitle(c, locale)}</a></li>)}
+                </ul>
+              </details>
+            ) : (
+              <a href={ctx.path('category', r.handle)}>{categoryTitle(r, locale)}</a>
+            )}
+          </li>
+        ))}
+        <li><a href={ctx.path('sold')}>{t.nav.sold}</a></li>
+        <li><a href={ctx.path('favorites')}>{t.favorites.label}</a></li>
+        <li><a href={ctx.path('faq')}>{t.pages.faq}</a></li>
+        <li><a href={ctx.path('contact')}>{t.pages.contact}</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>

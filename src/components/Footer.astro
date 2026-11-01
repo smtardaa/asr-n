@@ -1,0 +1,65 @@
+---
+import { BUSINESS, ROOT_CATEGORY_ORDER } from '../config/site';
+import { categoryTitle } from '../lib/data';
+import { withBase } from '../i18n';
+import type { Category } from '../lib/data/types';
+import type { PageCtx } from '../lib/page';
+
+interface Props { ctx: PageCtx; categories: Category[] }
+const { ctx, categories } = Astro.props;
+const { t, locale, env } = ctx;
+const byHandle = new Map(categories.map((c) => [c.handle, c]));
+const roots = ROOT_CATEGORY_ORDER.map((h) => byHandle.get(h)).filter((c): c is Category => !!c);
+const social = Object.entries(BUSINESS.social).filter(([, v]) => !!v);
+---
+<footer class="site-footer">
+  <div class="container footer-top">
+    <div>
+      <div class="footer-brand">
+        <img src={withBase('/brand/logo-96.webp')} srcset={`${withBase('/brand/logo-96.webp')} 1x, ${withBase('/brand/logo-192.webp')} 2x`} width="64" height="64" alt={t.meta.siteName} loading="lazy" />
+        <div>
+          <div class="brand-name">ASRIN</div>
+          <div class="tag-line">{t.footer.tagline}</div>
+        </div>
+      </div>
+      {social.length > 0 && (
+        <ul style="display:flex;gap:14px;margin-top:16px">
+          {social.map(([k, v]) => <li><a href={v} rel="noopener" target="_blank">{k}</a></li>)}
+        </ul>
+      )}
+    </div>
+    <nav aria-label={t.footer.categories}>
+      <h2>{t.footer.categories}</h2>
+      <ul>
+        {roots.map((r) => <li><a href={ctx.path('category', r.handle)}>{categoryTitle(r, locale)}</a></li>)}
+      </ul>
+    </nav>
+    <nav aria-label={t.pages.corporate}>
+      <h2>{t.pages.corporate}</h2>
+      <ul>
+        <li><a href={ctx.path('about')}>{t.pages.about}</a></li>
+        <li><a href={ctx.path('contact')}>{t.pages.contact}</a></li>
+        <li><a href={ctx.path('faq')}>{t.pages.faq}</a></li>
+        <li><a href={ctx.path('shipping')}>{t.pages.shipping}</a></li>
+        <li><a href={ctx.path('returns')}>{t.pages.returns}</a></li>
+        <li><a href={ctx.path('new')}>{t.nav.newArrivals}</a></li>
+        <li><a href={ctx.path('sold')}>{t.nav.sold}</a></li>
+      </ul>
+    </nav>
+    <nav aria-label={t.pages.legal}>
+      <h2>{t.pages.legal}</h2>
+      <ul>
+        <li><a href={ctx.path('privacy')}>{t.pages.privacy}</a></li>
+        <li><a href={ctx.path('kvkk')}>{t.pages.kvkk}</a></li>
+        <li><a href={ctx.path('cookies')}>{t.pages.cookies}</a></li>
+        <li><a href={ctx.path('distanceSales')}>{t.pages.distanceSales}</a></li>
+        <li><a href={ctx.path('preInfo')}>{t.pages.preInfo}</a></li>
+        <li><a href={ctx.path('terms')}>{t.pages.terms}</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container footer-bottom">
+    <span>© {new Date().getFullYear()} {BUSINESS.legalName || t.meta.siteName}. {t.footer.rights}</span>
+    {env.showDemoNotice && <span>{t.footer.demo}</span>}
+  </div>
+</footer>

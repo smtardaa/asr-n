@@ -1,0 +1,26 @@
+---
+import { fmt } from '../i18n';
+import { withParams } from '../lib/query';
+import type { PageCtx } from '../lib/page';
+
+interface Props { ctx: PageCtx; page: number; pageCount: number }
+const { ctx, page, pageCount } = Astro.props;
+const { t } = ctx;
+const href = (n: number) => withParams(ctx.url, { page: n > 1 ? String(n) : null }, false);
+const pages: Array<number | 'gap'> = [];
+for (let i = 1; i <= pageCount; i++) {
+  if (i === 1 || i === pageCount || Math.abs(i - page) <= 1) pages.push(i);
+  else if (pages[pages.length - 1] !== 'gap') pages.push('gap');
+}
+---
+{pageCount > 1 && (
+  <nav class="pagination" aria-label={t.a11y.pagination}>
+    {page > 1 && <a href={href(page - 1)} rel="prev">‹ <span>{t.listing.prev}</span></a>}
+    {pages.map((n) => n === 'gap'
+      ? <span class="gap" aria-hidden="true">…</span>
+      : n === page
+        ? <span aria-current="page"><span class="sr-only">{fmt(t.listing.page, { n })}</span><span aria-hidden="true">{n}</span></span>
+        : <a href={href(n)} aria-label={fmt(t.listing.page, { n })}>{n}</a>)}
+    {page < pageCount && <a href={href(page + 1)} rel="next"><span>{t.listing.next}</span> ›</a>}
+  </nav>
+)}

@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Icon from '../components/Icon.astro';
+import type { Locale } from '../config/site';
+import type { Category, Product } from '../lib/data/types';
+import { productMeta, type PageCtx } from '../lib/page';
+import type { Labels } from '../lib/labels';
+import type { SeoInput } from '../lib/seo';
+
+interface Props {
+  ctx: PageCtx;
+  categories: Category[];
+  product: Product;
+  similar: Product[];
+  labels: Labels;
+  crumbs: Array<{ name: string; href?: string }>;
+  seo: SeoInput;
+  languageLinks: Partial<Record<Locale, string>>;
+}
+const { ctx, categories, product: p, similar, labels, crumbs, seo, languageLinks } = Astro.props;
+const { t } = ctx;
+const price = ctx.price(p.price);
+const rows = labels.specRows(p);
+const main = p.images[0];
+const cartData = JSON.stringify({ handle: p.handle, variantId: p.variantId, price: p.price.amount, max: p.quantityAvailable ?? 10 });
+const primaryCat = p.primaryCategory?.handle;
+const imgLabel = (i: number) => {
+  const r = p.images[i]?.role;
+  return r === 'obverse' ? t.product.obverse : r === 'reverse' ? t.product.reverse : `${t.product.image} ${i + 1}`;
+};
+---
+<Base ctx={ctx} seo={seo} categories={categories} routeKey="product" languageLinks={languageLinks}>
+  <Breadcrumbs items={crumbs} label={t.a11y.breadcrumb} />
+  <div class="container">
+    <article class="product" aria-labelledby="product-title">
+      <div class="gallery" data-gallery aria-label={t.a11y.gallery} role="region">
+        <div class="gallery-main">
+          {!p.available && <span class="tag tag-sold">{t.product.sold}</span>}
+          {main ? (
+            <button type="button" data-zoom-open aria-label={`${t.product.viewLarger}: ${main.alt}`}>
+              <img src={main.url} width={main.width} height={main.height} alt={main.alt} fetchpriority="high" decoding="async" data-gallery-main />
+            </button>
+          ) : <span class="muted">—</span>}
+          {main && <span class="zoom-hint" aria-hidden="true">{t.product.zoomHint}</span>}
+        </div>
+        {p.images.length > 1 && (
+          <ul class="thumbs">
+            {p.images.map((im, i) => (
+              <li>
+                <button type="button" aria-current={i === 0 ? 'true' : 'false'} data-thumb={i} data-src={im.url} data-alt={im.alt} data-w={im.width} data-h={im.height} aria-label={imgLabel(i)}>
+                  <img src={im.thumbUrl ?? im.url} width={Math.round(im.width / 4)} height={Math.round(im.height / 4)} alt="" loading="lazy" decoding="async" />
+                </button>
+                <span class="cap" aria-hidden="true">{imgLabel(i)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <dialog class="zoom-dialog" data-zoom-dialog aria-label={t.product.viewLarger}>
+          <div class="zoom-bar">
+            <span data-zoom-caption>{main?.alt}</span>
+            <span>
+              <button type="button" data-zoom-toggle><Icon name="zoom" /> ×2</button>
+              <button type="button" data-zoom-close>{t.a11y.close}</button>
+            </span>
+          </div>
+          <div class="zoom-stage" data-zoom-stage><img src={main?.url} alt={main?.alt ?? ''} data-zoom-img /></div>
+        </dialog>
+      </div>
+
+      <div class="product-info">
+        <div class="product-tags">
+          {p.isDemo && ctx.env.showDemoNotice && <span class="tag tag-demo">{t.product.demoBadge}</span>}
+          {p.isNew && p.available && <span class="tag tag-new">{t.product.new}</span>}
+          {!p.available && <span class="tag tag-sold">{t.product.sold}</span>}
+        </div>
+        <h1 id="product-title">{p.title}</h1>
+        {(p.attributes.condition || p.sku) && (
+          <p class="cond-line">
+            {p.attributes.condition && <span>{t.product.attr.condition}: <strong>{labels.condition(p.attributes.condition)}</strong></span>}
+            {p.sku && <span>{t.product.attr.sku}: <strong>{p.sku}</strong></span>}
+          </p>
+        )}
+        <p class:list={['product-price', { 'is-sold': !p.available }]} data-price={p.price.amount}>{price.text}</p>
+        {price.approximate && (
+          <p class="product-price-sub">≈ {ctx.pricing.mode === 'demo' ? ctx.rateNote : t.cart.tryNote} {price.chargeText && `(${price.chargeText})`}</p>
+        )}
+        <p class:list={['stock', { 'is-sold': !p.available }]}>{t.product.attr.stock}: {p.available ? t.product.inStock : t.product.sold}</p>
+
+        {p.available ? (
+          <div class="buy-row">
+            <button class="btn btn-primary" type="button" data-add-to-cart={cartData} data-label-added={t.cart.added}>
+              <Icon name="cart" />{t.product.addToCart}
+            </button>
+            <button class="btn btn-outline fav-toggle" type="button" aria-pressed="false" data-fav={p.handle} aria-label={t.favorites.add}>
+              <Icon name="heart" />
+            </button>
+          </div>
+        ) : (
+          <div class="sold-box" role="note">
+            <p style="margin:0 0 6px"><strong>{t.product.sold}.</strong> {t.product.soldText}</p>
+            <a href="#similar">{t.product.similarAvailable} ↓</a>
+          </div>
+        )}
+
+        <h2 class="info-title">{t.product.specs}</h2>
+        <table class="specs">
+          <tbody>
+            {rows.map((r) => <tr><th scope="row">{r.name}</th><td>{r.value}</td></tr>)}
+            {primaryCat && <tr><th scope="row">{t.product.attr.category}</th><td><a href={ctx.path('category', primaryCat)}>{labels.category(primaryCat)}</a></td></tr>}
+          </tbody>
+        </table>
+
+        <h2 class="info-title">{t.product.description}</h2>
+        <div class="prose"><p>{p.description}</p></div>
+
+        {p.isDemo && p.source && ctx.env.showDemoNotice && (
+          <p class="source-note">{t.demo.sourceNote} {t.product.source}: <a href={p.source.url} rel="nofollow noopener" target="_blank">{new URL(p.source.url).hostname}</a></p>
+        )}
+      </div>
+    </article>
+
+    {similar.length > 0 && (
+      <section class="section" id="similar" aria-labelledby="similar-title" style="padding-top:0">
+        <div class="section-head"><h2 class="section-title" id="similar-title" style="font-size:clamp(1.8rem,3.4vw,2.6rem)">{p.available ? t.product.similar : t.product.similarAvailable}</h2></div>
+        <ul class="grid">
+          {similar.map((s) => <li><ProductCard ctx={ctx} product={s} meta={productMeta(s, ctx, labels.country)} /></li>)}
+        </ul>
+      </section>
+    )}
+  </div>
+</Base>

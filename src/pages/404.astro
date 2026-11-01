@@ -1,0 +1,10 @@
+---
+/** GitHub Pages bilinmeyen her yol için bu dosyayı (404.html) gösterir. Varsayılan dil Türkçe. */
+import StatusView from '../views/StatusView.astro';
+import { pageContext } from '../lib/page';
+
+export const prerender = true;
+const ctx = pageContext(Astro, 'tr');
+const categories = await ctx.provider.getCategories(ctx.req);
+---
+<StatusView ctx={ctx} categories={categories} kind="404" />

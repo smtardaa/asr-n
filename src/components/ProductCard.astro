@@ -1,0 +1,49 @@
+---
+import type { Product } from '../lib/data/types';
+import type { PageCtx } from '../lib/page';
+import Icon from './Icon.astro';
+
+interface Props { ctx: PageCtx; product: Product; meta: string[]; eager?: boolean; headingLevel?: 'h2' | 'h3' }
+const { ctx, product: p, meta, eager = false, headingLevel = 'h3' } = Astro.props;
+const { t } = ctx;
+const img = p.images[0];
+const price = ctx.price(p.price);
+const url = ctx.path('product', p.handle);
+const H = headingLevel;
+const cartData = JSON.stringify({ handle: p.handle, variantId: p.variantId, price: p.price.amount, max: p.quantityAvailable ?? 10 });
+---
+<article class:list={['card', { 'is-sold': !p.available }]}>
+  {!p.available ? <span class="tag tag-sold">{t.product.sold}</span> : p.isNew ? <span class="tag tag-new">{t.product.new}</span> : null}
+  <button class="fav-btn" type="button" aria-pressed="false" data-fav={p.handle} aria-label={`${t.favorites.add}: ${p.title}`}>
+    <Icon name="heart" />
+  </button>
+  <div class="card-media">
+    {img ? (
+      <img
+        src={img.thumbUrl ?? img.url}
+        srcset={img.thumbUrl ? `${img.thumbUrl} 320w, ${img.url} 640w` : undefined}
+        sizes="(max-width: 640px) 46vw, (max-width: 1100px) 30vw, 280px"
+        width={Math.round(img.width / 2)} height={Math.round(img.height / 2)}
+        alt={img.alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={eager ? 'high' : undefined}
+      />
+    ) : <span class="noimg">—</span>}
+  </div>
+  <div class="card-body">
+    <H class="card-title"><a href={url}>{p.title}</a></H>
+    {meta.length > 0 && <p class="card-meta">{meta.map((m) => <span>{m}</span>)}</p>}
+    <div class="card-foot">
+      <p class="price" style="margin:0">
+        <span class="sr-only">{p.available ? t.product.inStock : t.product.sold}: </span>{price.approximate && <span aria-hidden="true">≈ </span>}{price.text}
+        {price.approximate && price.chargeText && <span class="price-approx">{price.chargeText}</span>}
+      </p>
+      {p.available && (
+        <button class="cart-btn" type="button" data-add-to-cart={cartData} aria-label={`${t.product.addToCart}: ${p.title}`}>
+          <Icon name="cart" />
+        </button>
+      )}
+    </div>
+  </div>
+</article>

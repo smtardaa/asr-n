@@ -1,0 +1,119 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { BUSINESS, COMMERCE_POLICIES } from '../config/site';
+import { LEGAL_SECTIONS } from '../content/legal';
+import { alternatesFor, type RouteKey } from '../i18n';
+import type { Category } from '../lib/data/types';
+import type { PageCtx } from '../lib/page';
+
+type Key = 'about' | 'contact' | 'faq' | 'shipping' | 'returns' | 'privacy' | 'distanceSales' | 'preInfo' | 'kvkk' | 'cookies' | 'terms';
+interface Props { ctx: PageCtx; categories: Category[]; page: Key }
+const { ctx, categories, page } = Astro.props;
+const { t, locale } = ctx;
+const C = t.content;
+const title = t.pages[page];
+const isLegal = ['privacy', 'distanceSales', 'preInfo', 'kvkk', 'cookies', 'terms'].includes(page);
+
+// Yalnızca geçerli değerlerden bağlantı üretilir; boşsa "Doldurulacak"
+const phoneOk = /^\+?\d[\d\s]{7,}$/.test(BUSINESS.phone);
+const waOk = /^\d{10,15}$/.test(BUSINESS.whatsapp);
+const mailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(BUSINESS.email);
+const mapOk = /^https:\/\//.test(BUSINESS.mapUrl);
+const contactRows: Array<{ label: string; value?: string; href?: string }> = [
+  { label: C.phone, value: BUSINESS.phone || undefined, href: phoneOk ? `tel:${BUSINESS.phone.replace(/\s/g, '')}` : undefined },
+  { label: C.whatsapp, value: BUSINESS.whatsapp || undefined, href: waOk ? `https://wa.me/${BUSINESS.whatsapp}` : undefined },
+  { label: C.email, value: BUSINESS.email || undefined, href: mailOk ? `mailto:${BUSINESS.email}` : undefined },
+  { label: C.address, value: BUSINESS.address || undefined, href: mapOk ? BUSINESS.mapUrl : undefined },
+  { label: C.hours, value: BUSINESS.workingHours || undefined },
+  { label: C.social, value: Object.values(BUSINESS.social).filter(Boolean).join(' · ') || undefined },
+];
+const companyRows = [
+  { label: C.company, value: BUSINESS.legalName },
+  { label: C.taxOffice, value: BUSINESS.taxOffice },
+  { label: C.taxNumber, value: BUSINESS.taxNumber },
+  { label: C.mersis, value: BUSINESS.mersisNumber },
+];
+const policyRows: Record<'shipping' | 'returns', Array<{ label: string; value: string }>> = {
+  shipping: [
+    { label: C.shippingCarrier, value: COMMERCE_POLICIES.shippingCarrier },
+    { label: C.shippingFee, value: COMMERCE_POLICIES.shippingFee },
+    { label: C.shippingTime, value: COMMERCE_POLICIES.shippingTime },
+    { label: C.freeShipping, value: COMMERCE_POLICIES.freeShippingThreshold },
+  ],
+  returns: [
+    { label: C.cancelPolicy, value: COMMERCE_POLICIES.cancellationPolicy },
+    { label: C.returnPolicy, value: COMMERCE_POLICIES.returnPolicy },
+  ],
+};
+const faqLd = page === 'faq' ? [{
+  '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: C.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+}] : [];
+const seo = {
+  title, description: page === 'faq' ? C.faq.map((f) => f.q).join(' ').slice(0, 155) : `${title} — ${t.meta.siteName}`,
+  path: ctx.path(page as RouteKey), alternates: alternatesFor(page as RouteKey), jsonLd: faqLd,
+};
+---
+<Base ctx={ctx} seo={seo} categories={categories} routeKey={page as RouteKey} languageLinks={alternatesFor(page as RouteKey)}>
+  <Breadcrumbs items={[{ name: t.ui.home, href: ctx.path('home') }, { name: title }]} label={t.a11y.breadcrumb} />
+  <div class="container content-page">
+    <header class="page-head"><h1>{title}</h1></header>
+    <div class="prose">
+      {page === 'about' && (
+        <>
+          <p>{C.aboutLead}</p>
+          <h2>{C.aboutFocus}</h2>
+          <p>{C.aboutFocusText}</p>
+          <h2>{C.aboutHistory}</h2>
+          {BUSINESS.history ? <p>{BUSINESS.history}</p> : <p><span class="tbd">{t.tbd.label}</span> {t.tbd.note}</p>}
+        </>
+      )}
+
+      {page === 'contact' && (
+        <>
+          {!contactRows.some((r) => r.value) && <p>{C.contactLead}</p>}
+          <dl class="info-list">
+            {contactRows.map((r) => (
+              <>
+                <dt>{r.label}</dt>
+                <dd>{r.value ? (r.href ? <a href={r.href} rel={r.href.startsWith('http') ? 'noopener' : undefined}>{r.value}</a> : r.value) : <span class="tbd">{t.tbd.label}</span>}</dd>
+              </>
+            ))}
+          </dl>
+          <h2>{C.company}</h2>
+          <dl class="info-list">
+            {companyRows.map((r) => (<><dt>{r.label}</dt><dd>{r.value || <span class="tbd">{t.tbd.label}</span>}</dd></>))}
+          </dl>
+        </>
+      )}
+
+      {page === 'faq' && (
+        <div class="faq">
+          {C.faq.map((f) => (
+            <details><summary>{f.q}</summary><p>{f.a}</p></details>
+          ))}
+        </div>
+      )}
+
+      {(page === 'shipping' || page === 'returns') && (
+        <>
+          <p class="notice notice-info"><strong>{t.tbd.label}</strong>{t.tbd.note}</p>
+          <dl class="info-list">
+            {policyRows[page].map((r) => (<><dt>{r.label}</dt><dd>{r.value || <span class="tbd">{t.tbd.label}</span>}</dd></>))}
+          </dl>
+          {LEGAL_SECTIONS[page][locale].map((h) => (<><h2>{h}</h2><p><span class="tbd">{t.tbd.label}</span></p></>))}
+        </>
+      )}
+
+      {isLegal && (
+        <>
+          <p class="notice notice-warn"><strong>{t.tbd.label}</strong>{t.tbd.templateNote}</p>
+          {LEGAL_SECTIONS[page as keyof typeof LEGAL_SECTIONS][locale].map((h, i) => (
+            <><h2>{i + 1}. {h}</h2><p><span class="tbd">{t.tbd.label}</span> {t.tbd.note}</p></>
+          ))}
+        </>
+      )}
+    </div>
+  </div>
+</Base>

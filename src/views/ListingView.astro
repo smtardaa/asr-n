@@ -1,0 +1,253 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Pagination from '../components/Pagination.astro';
+import Icon from '../components/Icon.astro';
+import { PRICING, type Locale } from '../config/site';
+import { categoryTitle } from '../lib/data';
+import type { Category, ProductListResult } from '../lib/data/types';
+import { productMeta, type PageCtx } from '../lib/page';
+import { makeLabels } from '../lib/labels';
+import { withParams, type ParsedQuery } from '../lib/query';
+import { countLabel, fmt, type RouteKey } from '../i18n';
+import type { SeoInput } from '../lib/seo';
+
+interface Props {
+  ctx: PageCtx;
+  categories: Category[];
+  mode: 'products' | 'category' | 'search' | 'new' | 'sold';
+  routeKey: RouteKey;
+  category?: Category;
+  result: ProductListResult;
+  /** Statik sürüm: filtre seçenekleri stok=tümü kümesinden gelir; sayılar tarayıcıda güncellenir */
+  optionFacets?: ProductListResult['facets'];
+  query: ParsedQuery;
+  heading: string;
+  intro?: string;
+  crumbs: Array<{ name: string; href?: string }>;
+  seo: SeoInput;
+  languageLinks: Partial<Record<Locale, string>>;
+}
+const { ctx, categories, mode, routeKey, category, result, optionFacets, query, heading, intro, crumbs, seo, languageLinks } = Astro.props;
+const { t, locale } = ctx;
+const L = t.listing;
+const labels = makeLabels(locale, categories);
+const byHandle = new Map(categories.map((c) => [c.handle, c]));
+const children = category ? category.children.map((h) => byHandle.get(h)).filter((c): c is Category => !!c).sort((a, b) => (b.productCount > 0 ? 1 : 0) - (a.productCount > 0 ? 1 : 0) || a.order - b.order) : [];
+const MANY = children.length > 14;
+const topChildren = MANY ? [...children].sort((a, b) => b.productCount - a.productCount).slice(0, 12) : children;
+const restChildren = MANY ? children.filter((c) => !topChildren.includes(c)).sort((a, b) => categoryTitle(a, locale).localeCompare(categoryTitle(b, locale), locale)) : [];
+const showFilters = mode !== 'new';
+const f = result.facets;
+/** Seçenek listesi (tüm değerler) + varsayılan görünümdeki sayılar (yoksa 0) */
+const opts = (all: Array<{ value: string; count: number }> | undefined, cur: Array<{ value: string; count: number }>) => {
+  if (!all) return cur;
+  const m = new Map(cur.map((x) => [x.value, x.count]));
+  return all.map((x) => ({ value: x.value, count: m.get(x.value) ?? 0 }));
+};
+const of = optionFacets;
+const displayCurrency = ctx.pricing.mode === 'demo' || ctx.pricing.checkoutTryOnly ? PRICING.displayCurrencyByLocale[locale] : PRICING.baseCurrency;
+const fmtPrice = (v?: number) => (v == null ? '' : String(Math.floor(ctx.price({ amount: v, currencyCode: 'TRY' }).display.amount)));
+const sel = (list: string[] | undefined, v: string) => !!list?.includes(v);
+const defaultStock = mode === 'sold' ? 'sold' : 'available';
+const stock = query.stock ?? defaultStock;
+const sortOptions: Array<[string, string]> = [
+  ...(query.q ? [['relevance', L.sortRelevance] as [string, string]] : []),
+  ['newest', L.sortNewest], ['price-asc', L.sortPriceAsc], ['price-desc', L.sortPriceDesc], ['name', L.sortName],
+];
+const currentSort = query.sort ?? (query.q ? 'relevance' : 'newest');
+
+// Etkin filtre çipleri (kaldırma bağlantılarıyla)
+const chips: Array<{ label: string; href: string }> = [];
+const rm = (k: string, v?: string) => {
+  const list = ctx.url.searchParams.getAll(k).flatMap((x) => x.split(','));
+  return withParams(ctx.url, { [k]: v ? list.filter((x) => x !== v) : null });
+};
+if (mode !== 'search' && query.q) chips.push({ label: `“${query.q}”`, href: rm('q') });
+query.countries?.forEach((v) => chips.push({ label: labels.country(v), href: rm('country', v) }));
+query.denominations?.forEach((v) => chips.push({ label: labels.denomination(v), href: rm('denom', v) }));
+query.conditions?.forEach((v) => chips.push({ label: labels.condition(v), href: rm('cond', v) }));
+query.materials?.forEach((v) => chips.push({ label: labels.material(v), href: rm('mat', v) }));
+query.certification?.forEach((v) => chips.push({ label: v, href: rm('cert', v) }));
+if (query.yearFrom != null || query.yearTo != null) chips.push({ label: `${L.year}: ${query.yearFrom ?? '…'}–${query.yearTo ?? '…'}`, href: withParams(ctx.url, { year_from: null, year_to: null }) });
+if (query.priceMinDisplay != null || query.priceMaxDisplay != null) chips.push({ label: `${L.price}: ${query.priceMinDisplay ?? '…'}–${query.priceMaxDisplay ?? '…'} ${displayCurrency}`, href: withParams(ctx.url, { price_min: null, price_max: null }) });
+if (query.stock && query.stock !== defaultStock) chips.push({ label: `${L.stock}: ${query.stock === 'sold' ? L.stockSold : query.stock === 'all' ? L.stockAll : L.stockAvailable}`, href: rm('stock') });
+const clearHref = mode === 'search' && query.q ? `${ctx.url.pathname}?q=${encodeURIComponent(query.q)}` : ctx.url.pathname;
+const facetList = (name: string, legend: string, values: Array<{ value: string; count: number }>, selected: string[] | undefined, label: (v: string) => string, max = 40) => ({ name, legend, values: values.slice(0, max), selected, label });
+const groups = [
+  facetList('country', L.country, opts(of?.countries, f.countries), query.countries, labels.country, 60),
+  facetList('denom', L.denomination, opts(of?.denominations, f.denominations), query.denominations, labels.denomination, 60),
+  facetList('cond', L.condition, opts(of?.conditions, f.conditions), query.conditions, labels.condition),
+  facetList('mat', L.material, opts(of?.materials, f.materials), query.materials, labels.material),
+  facetList('cert', L.certification, opts(of?.certification, f.certification), query.certification, (v) => v),
+].filter((g) => g.values.length > 1 || (g.selected?.length ?? 0) > 0);
+const listingConfig = {
+  mode, category: category?.handle, defaultStock, allProductsUrl: ctx.path('products'), displayCurrency,
+  S: {
+    sold: t.product.sold, isNew: t.product.new, favAdd: t.favorites.add, addToCart: t.product.addToCart, inStock: t.product.inStock,
+    resultsOne: L.resultsOne, results: L.results, noResults: L.noResults, noResultsHint: L.noResultsHint, clear: L.clear, examples: t.search.examples,
+    allProducts: t.nav.allProducts, prev: L.prev, next: L.next, page: L.page, removeFilter: L.removeFilter, year: L.year, price: L.price, stock: L.stock,
+    stockAvailable: L.stockAvailable, stockSold: L.stockSold, stockAll: L.stockAll, searchFor: t.pages.searchFor, searchEmpty: t.pages.searchEmpty, pagination: t.a11y.pagination,
+  },
+};
+const keepSearch = (() => { const sp = new URLSearchParams(ctx.url.search); sp.delete('page'); const s = sp.toString(); return s ? `?${s}` : ''; })();
+---
+<Base ctx={ctx} seo={seo} categories={categories} routeKey={routeKey} languageLinks={languageLinks}>
+  <Breadcrumbs items={crumbs} label={t.a11y.breadcrumb} />
+  <div class="container">
+    <header class="page-head">
+      <h1>{heading}</h1>
+      {intro && <p>{intro}</p>}
+      {children.length > 0 && (
+        <ul class="subcats" aria-label={L.subcategories}>
+          {topChildren.map((c) => (
+            <li><a class:list={{ 'is-empty': c.productCount === 0 }} href={ctx.path('category', c.handle)}>{categoryTitle(c, locale)} <span class="count">{c.productCount}</span></a></li>
+          ))}
+        </ul>
+      )}
+      {restChildren.length > 0 && (
+        <details class="subcats-more">
+          <summary>{L.showMore} ({restChildren.length})</summary>
+          <ul class="subcats">
+            {restChildren.map((c) => (
+              <li><a class:list={{ 'is-empty': c.productCount === 0 }} href={ctx.path('category', c.handle)}>{categoryTitle(c, locale)} <span class="count">{c.productCount}</span></a></li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </header>
+
+    <div class:list={['listing', { 'no-filters': !showFilters }]} style={!showFilters ? 'grid-template-columns:1fr' : undefined}>
+      {showFilters && (
+        <>
+          <div class="filters-scrim" hidden data-filters-scrim></div>
+          <aside class="filters" id="filters" aria-label={L.filters} data-filters>
+            <form id="filter-form" method="get" action={ctx.url.pathname} data-filter-form>
+              <div class="filters-head">
+                <h2>{L.filters}</h2>
+                <button class="icon-btn close-filters" type="button" data-filters-close style="color:var(--c-bordo-800)"><Icon name="close" /><span class="sr-only">{t.a11y.close}</span></button>
+              </div>
+              <input type="hidden" name="q" value={query.q ?? ''} data-q-input />
+              {query.sort && <input type="hidden" name="sort" value={query.sort} data-sort-mirror />}
+
+              {mode !== 'category' && categories.length > 0 && (
+                <fieldset>
+                  <legend>{L.category}</legend>
+                  <ul class="cat-tree">
+                    {categories.filter((c) => !c.parent && c.productCount > 0).sort((a, b) => a.order - b.order).map((c) => (
+                      <li><a href={ctx.path('category', c.handle) + keepSearch}>{categoryTitle(c, locale)} <span class="muted">{c.productCount}</span></a></li>
+                    ))}
+                  </ul>
+                </fieldset>
+              )}
+
+              {mode !== 'sold' && (
+                <fieldset>
+                  <legend>{L.stock}</legend>
+                  {[['available', L.stockAvailable, f.stock.available], ['sold', L.stockSold, f.stock.sold], ['all', L.stockAll, f.stock.available + f.stock.sold]].map(([v, label, n]) => (
+                    <label class="check"><input type="radio" name="stock" value={v === defaultStock ? '' : v} checked={stock === v} />{label}<span class="n">{n}</span></label>
+                  ))}
+                </fieldset>
+              )}
+
+              {groups.map((g) => (
+                <fieldset>
+                  <legend>{g.legend}</legend>
+                  <div class="check-list">
+                    {g.values.map((fv) => (
+                      <label class="check"><input type="checkbox" name={g.name} value={fv.value} checked={sel(g.selected, fv.value)} />{g.label(fv.value)}<span class="n">{fv.count}</span></label>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+
+              <fieldset>
+                <legend>{L.year}</legend>
+                <div class="range">
+                  <label>{L.yearFrom}<input class="input" type="number" inputmode="numeric" name="year_from" min="1000" max="2100" placeholder={f.years.min ? String(f.years.min) : ''} value={query.yearFrom ?? ''} /></label>
+                  <label>{L.yearTo}<input class="input" type="number" inputmode="numeric" name="year_to" min="1000" max="2100" placeholder={f.years.max ? String(f.years.max) : ''} value={query.yearTo ?? ''} /></label>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>{L.price} <span class="muted">({displayCurrency})</span></legend>
+                <div class="range">
+                  <label>{L.priceMin}<input class="input" type="number" inputmode="decimal" min="0" step="any" name="price_min" placeholder={fmtPrice(f.price.min)} value={query.priceMinDisplay ?? ''} /></label>
+                  <label>{L.priceMax}<input class="input" type="number" inputmode="decimal" min="0" step="any" name="price_max" placeholder={fmtPrice(f.price.max)} value={query.priceMaxDisplay ?? ''} /></label>
+                </div>
+              </fieldset>
+
+              <div class="filters-actions">
+                <button class="btn btn-primary btn-block" type="submit">{L.apply}</button>
+                <a class="btn btn-outline btn-block" href={clearHref}>{L.clear}</a>
+              </div>
+            </form>
+          </aside>
+        </>
+      )}
+
+      <section aria-labelledby="results-count">
+        <div class="toolbar">
+          <p class="count" id="results-count" role="status" style="margin:0">{countLabel(locale, result.total)}</p>
+          <div class="toolbar-right">
+            {showFilters && (
+              <button class="btn btn-outline filter-toggle" type="button" aria-controls="filters" aria-expanded="false" data-filters-open>
+                <Icon name="filter" />{L.showFilters}<span data-filter-count>{chips.length > 0 && ` (${chips.length})`}</span>
+              </button>
+            )}
+            {showFilters && (
+              <>
+                <label class="sr-only" for="sort-select">{L.sort}</label>
+                <select class="select" id="sort-select" name="sort" form="filter-form" data-sort-select data-relevance={L.sortRelevance}>
+                  {sortOptions.map(([v, label]) => <option value={v} selected={v === currentSort}>{label}</option>)}
+                </select>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div data-chips aria-label={L.activeFilters}>
+          {chips.length > 0 && (
+            <ul class="chips">
+              {chips.map((c) => <li><a class="chip" href={c.href} aria-label={fmt(L.removeFilter, { name: c.label })}>{c.label}<Icon name="x" /></a></li>)}
+              <li><a class="chip" href={clearHref}>{L.clear}</a></li>
+            </ul>
+          )}
+        </div>
+
+        <div data-results aria-live="polite">
+        {result.items.length > 0 && !(mode === 'search' && !query.q) ? (
+          <>
+            <ul class="grid cols-3">
+              {result.items.map((p, i) => <li><ProductCard ctx={ctx} product={p} meta={productMeta(p, ctx, labels.country)} eager={i < 3} headingLevel="h2" /></li>)}
+            </ul>
+            <Pagination ctx={ctx} page={result.page} pageCount={result.pageCount} />
+          </>
+        ) : (
+          <div class="empty">
+            {mode === 'category' && category && category.productCount === 0 ? (
+              <>
+                <h2>{L.emptyCategory}</h2>
+                <p class="muted">{L.emptyCategoryHint}</p>
+              </>
+            ) : mode === 'search' && !query.q ? (
+              <h2>{t.pages.searchEmpty}</h2>
+            ) : (
+              <>
+                <h2>{L.noResults}</h2>
+                <p class="muted">{L.noResultsHint}</p>
+                {chips.length > 0 && <a class="btn btn-outline" href={clearHref}>{L.clear}</a>}
+              </>
+            )}
+            <p class="muted" style="margin-top:16px">{t.search.examples}</p>
+            <a class="btn btn-primary" href={ctx.path('products')}>{t.nav.allProducts}</a>
+          </div>
+        )}
+        </div>
+        {ctx.rateNote && <p class="rate-note">{ctx.rateNote}</p>}
+        <script type="application/json" id="listing-config" set:html={JSON.stringify(listingConfig).replace(/</g, '\\u003c')} />
+      </section>
+    </div>
+  </div>
+</Base>

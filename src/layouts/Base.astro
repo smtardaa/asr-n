@@ -1,0 +1,84 @@
+---
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/600.css';
+import '@fontsource/cormorant-garamond/700.css';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import { LOCALE_TAGS, type Locale } from '../config/site';
+import type { PageCtx } from '../lib/page';
+import { absolute, hreflangLinks, robotsContent, type SeoInput } from '../lib/seo';
+import type { Category } from '../lib/data/types';
+import { withBase, type RouteKey } from '../i18n';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  ctx: PageCtx;
+  seo: SeoInput;
+  categories: Category[];
+  routeKey?: RouteKey | null;
+  /** Dil seçicinin hedefleri; yoksa her dilin ana sayfası */
+  languageLinks?: Partial<Record<Locale, string>>;
+}
+const { ctx, seo, categories, routeKey = null, languageLinks } = Astro.props;
+const { t, env, locale } = ctx;
+const title = seo.title.includes(t.meta.siteName) ? seo.title : `${seo.title} | ${t.meta.siteName}`;
+const canonical = absolute(env, seo.path);
+const hreflang = seo.alternates ? hreflangLinks(env, seo.alternates) : [];
+const ogImage = seo.image ? absolute(env, seo.image.url) : absolute(env, withBase('/brand/og-default.jpg'));
+const robots = robotsContent(env, seo.noindex);
+const clientConfig = {
+  locale,
+  intl: LOCALE_TAGS[locale].intl,
+  cartPath: ctx.path('cart'),
+  dataUrl: withBase(`/data/catalog-${locale}.json`),
+  mode: env.dataSource,
+  t: {
+    added: t.cart.added, addedShort: t.cart.addedShort, alreadyMax: t.cart.alreadyMax, favAdd: t.favorites.add, favRemove: t.favorites.remove,
+    cartLabel: t.cart.label,
+  },
+};
+---
+<!doctype html>
+<html lang={LOCALE_TAGS[locale].html} data-locale={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={seo.description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    {hreflang.map((l) => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
+    <meta property="og:site_name" content={t.meta.siteName} />
+    <meta property="og:type" content={seo.type === 'product' ? 'product' : 'website'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={seo.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={LOCALE_TAGS[locale].og} />
+    <meta property="og:image" content={ogImage} />
+    {seo.image?.width && <meta property="og:image:width" content={String(seo.image.width)} />}
+    {seo.image?.height && <meta property="og:image:height" content={String(seo.image.height)} />}
+    <meta property="og:image:alt" content={seo.image?.alt ?? t.meta.siteName} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#35050b" />
+    <link rel="icon" type="image/png" sizes="32x32" href={withBase('/favicon-32.png')} />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+    {(seo.jsonLd ?? []).map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld).replace(/</g, '\\u003c')} />)}
+    <script type="application/json" id="asrin-config" set:html={JSON.stringify(clientConfig).replace(/</g, '\\u003c')} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.a11y.skip}</a>
+    {env.showDemoNotice && (
+      <div class="demo-notice" role="note"><strong>DEMO</strong> · {t.demo.banner} {t.demo.staticNote}</div>
+    )}
+    <Header ctx={ctx} categories={categories} routeKey={routeKey} languageLinks={languageLinks} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer ctx={ctx} categories={categories} />
+    <div class="toast" role="status" aria-live="polite" id="toast"></div>
+    <script>
+      import '../scripts/main.ts';
+    </script>
+  </body>
+</html>

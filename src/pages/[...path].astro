@@ -1,0 +1,226 @@
+---
+/**
+ * Tek SSR yönlendirici: dil önekini ve yerelleştirilmiş yol parçalarını çözer, veriyi sağlayıcıdan alır,
+ * HTTP durumunu belirler ve ilgili görünümü sunucuda oluşturur (ürün başlığı, fiyat ve SEO ilk HTML'dedir).
+ */
+import HomeView from '../views/HomeView.astro';
+import ListingView from '../views/ListingView.astro';
+import ProductView from '../views/ProductView.astro';
+import CartView from '../views/CartView.astro';
+import FavoritesView from '../views/FavoritesView.astro';
+import ContentView from '../views/ContentView.astro';
+import StatusView from '../views/StatusView.astro';
+import { CATALOG, LOCALES, SOLD_PRODUCTS, type Locale } from '../config/site';
+import { alternatesFor, fmt, parsePath } from '../i18n';
+import { categoryTitle, DataSourceError, type Category, type Product, type ProductListResult } from '../lib/data';
+import { pageContext } from '../lib/page';
+import { hasFilters, parseQuery } from '../lib/query';
+import { makeLabels } from '../lib/labels';
+import { breadcrumbLd, productLd, truncate, type SeoInput } from '../lib/seo';
+
+export const prerender = true;
+
+/** GitHub Pages: tüm sayfalar build sırasında üretilir (4 dil × sabit sayfalar + kategoriler + ürünler). */
+export async function getStaticPaths() {
+  const { createDemoProvider } = await import('../lib/data/demo/provider');
+  const { routePath } = await import('../i18n');
+  const { LOCALES } = await import('../config/site');
+  const provider = createDemoProvider();
+  const ctx = { locale: 'tr' as const };
+  const [cats, prods] = await Promise.all([provider.getCategories(ctx), provider.listAllProductHandles(ctx)]);
+  const keys = ['home', 'products', 'search', 'new', 'sold', 'cart', 'favorites', 'about', 'contact', 'faq', 'shipping', 'returns', 'privacy', 'distanceSales', 'preInfo', 'kvkk', 'cookies', 'terms'] as const;
+  const toParam = (p: string) => p.replace(/^\/+|\/+$/g, '') || undefined;
+  const out: Array<{ params: { path: string | undefined } }> = [];
+  for (const l of LOCALES) {
+    for (const k of keys) out.push({ params: { path: toParam(routePath(l, k)) } });
+    for (const c of cats) out.push({ params: { path: toParam(routePath(l, 'category', c.handle)) } });
+    for (const p of prods) out.push({ params: { path: toParam(routePath(l, 'product', p.handle)) } });
+  }
+  return out;
+}
+
+const parsed = parsePath(Astro.url.pathname);
+// getStaticPaths, Astro nesnesinin tipini daraltır; bağlam yardımcısı genel AstroGlobal bekler
+const ctx = pageContext(Astro as unknown as Parameters<typeof pageContext>[0], parsed.locale);
+const { t, provider, req, locale } = ctx;
+const home = { name: t.ui.home, href: ctx.path('home') };
+
+/** Dil seçici: aynı sayfanın diğer dillerdeki karşılığı (+ filtre parametreleri korunur) */
+const keepQuery = (alts: Record<Locale, string>) => {
+  const sp = new URLSearchParams(Astro.url.search);
+  sp.delete('page');
+  const s = sp.toString();
+  return Object.fromEntries(LOCALES.map((l) => [l, alts[l] + (s ? `?${s}` : '')])) as Record<Locale, string>;
+};
+
+let categories: Category[] = [];
+let render: { view: string; props: Record<string, unknown> } = { view: '404', props: {} };
+
+try {
+  categories = await provider.getCategories(req);
+  const catBy = new Map(categories.map((c) => [c.handle, c]));
+  const crumbFor = (handles: string[]) => handles.map((h) => ({ name: catBy.get(h) ? categoryTitle(catBy.get(h)!, locale) : h, href: ctx.path('category', h) }));
+  const q = parseQuery(Astro.url.searchParams, locale);
+  const listingSeo = (title: string, description: string, base: string, alts: Record<Locale, string>, result: ProductListResult, forceNoindex = false): SeoInput => {
+    const filtered = hasFilters(q) || !!q.sort;
+    const page = result.page;
+    return {
+      title: page > 1 ? `${title} — ${fmt(t.listing.page, { n: page })}` : title,
+      description,
+      path: !filtered && page > 1 ? `${base}?page=${page}` : base,
+      alternates: !filtered && page === 1 ? alts : !filtered ? Object.fromEntries(LOCALES.map((l) => [l, `${alts[l]}?page=${page}`])) : undefined,
+      noindex: forceNoindex || filtered,
+      image: result.items[0]?.images[0] ? { url: result.items[0].images[0].url } : undefined,
+    };
+  };
+
+  switch (parsed.key) {
+    case 'home': {
+      const ed = await provider.getEditorial(req);
+      const [hero, newest, featured] = await Promise.all([
+        provider.getProductsByHandles(ed.heroProductHandles, req),
+        provider.listProducts({ sort: 'newest', stock: 'available', pageSize: 240 }, req),
+        provider.getProductsByHandles([...Object.values(ed.categoryImageHandles), ed.ottomanFeatureProduct ?? '', ...ed.foreignFeatureProducts].filter(Boolean), req),
+      ]);
+      const byH = new Map(featured.map((p) => [p.handle, p]));
+      const strip = await Promise.all(ed.featuredCategoryHandles.map(async (h) => {
+        const category = catBy.get(h);
+        if (!category) return null;
+        let prod = byH.get(ed.categoryImageHandles[h] ?? '');
+        if (!prod) prod = (await provider.listProducts({ category: h, pageSize: 1, stock: 'all' }, req)).items[0];
+        return { category, image: prod?.images[0], round: /madeni|hatira|osmanli/.test(h) };
+      }));
+      const items = newest.items;
+      const pick = (fn: (p: Product) => boolean) => items.filter(fn).slice(0, 8);
+      render = { view: 'home', props: {
+        hero, strip: strip.filter(Boolean),
+        tabs: {
+          all: items.slice(0, 8),
+          banknote: pick((p) => p.attributes.productType === 'banknote'),
+          coin: pick((p) => p.attributes.productType === 'coin' || p.attributes.productType === 'set'),
+          certified: pick((p) => !!p.attributes.certification),
+        },
+        ottoman: ed.ottomanFeatureProduct ? byH.get(ed.ottomanFeatureProduct) : undefined,
+        foreign: ed.foreignFeatureProducts.map((h) => byH.get(h)).filter(Boolean),
+        ottomanCategory: catBy.get(ed.ottomanFeatureCategory),
+        foreignCategory: catBy.get(ed.foreignFeatureCategory),
+        antiqueCategory: catBy.get(ed.antiqueCategory),
+      } };
+      break;
+    }
+    case 'products':
+    case 'search':
+    case 'sold': {
+      const key = parsed.key;
+      const result = await provider.listProducts({ ...q, stock: key === 'sold' ? 'sold' : q.stock }, req);
+      const optionFacets = (await provider.listProducts({ stock: key === 'sold' ? 'sold' : 'all', pageSize: 1 }, req)).facets;
+      const heading = key === 'products' ? t.pages.products : key === 'sold' ? t.pages.sold : q.q ? fmt(t.pages.searchFor, { q: q.q }) : t.pages.search;
+      const base = ctx.path(key);
+      const alts = alternatesFor(key);
+      const seo = key === 'search'
+        ? { ...listingSeo(q.q ? fmt(t.seo.search, { q: q.q }) : t.pages.search, t.meta.defaultDescription, base, alts, result, true), alternates: undefined }
+        : listingSeo(key === 'products' ? t.seo.products : t.seo.sold, key === 'products' ? t.seo.productsDesc : t.seo.soldDesc, base, alts, result);
+      render = { view: 'listing', props: {
+        mode: key, routeKey: key, result, optionFacets, query: q, heading,
+        intro: key === 'products' ? t.pages.productsIntro : key === 'sold' ? t.pages.soldIntro : undefined,
+        crumbs: [home, { name: key === 'products' ? t.pages.products : key === 'sold' ? t.pages.sold : t.pages.search }],
+        seo, languageLinks: keepQuery(alts),
+      } };
+      break;
+    }
+    case 'new': {
+      const result = await provider.listProducts({ sort: 'newest', stock: 'available', pageSize: CATALOG.newArrivalsCount, page: 1 }, req);
+      const alts = alternatesFor('new');
+      render = { view: 'listing', props: {
+        mode: 'new', routeKey: 'new', result: { ...result, pageCount: 1, total: result.items.length }, query: {}, heading: t.pages.newArrivals, intro: t.pages.newIntro,
+        crumbs: [home, { name: t.pages.newArrivals }],
+        seo: { title: t.seo.newArrivals, description: t.seo.newDesc, path: ctx.path('new'), alternates: alts, image: result.items[0]?.images[0] ? { url: result.items[0].images[0].url } : undefined },
+        languageLinks: alts,
+      } };
+      break;
+    }
+    case 'category': {
+      const category = catBy.get(parsed.param ?? '');
+      if (!category) break;
+      const result = await provider.listProducts({ ...q, category: category.handle }, req);
+      const optionFacets = (await provider.listProducts({ category: category.handle, stock: 'all', pageSize: 1 }, req)).facets;
+      const name = categoryTitle(category, locale);
+      const alts = alternatesFor('category', category.handle);
+      const desc = category.productCount > 0 ? fmt(t.seo.categoryDesc, { name, count: category.productCount }) : fmt(t.seo.categoryDescEmpty, { name });
+      const crumbs = [home, ...crumbFor(category.path)];
+      const seo = listingSeo(fmt(t.seo.category, { name }), desc, ctx.path('category', category.handle), alts, result);
+      seo.jsonLd = [breadcrumbLd(ctx.env, crumbs.map((c) => ({ name: c.name, path: c.href! })))];
+      render = { view: 'listing', props: {
+        mode: 'category', routeKey: 'category', category, result, optionFacets, query: q, heading: name,
+        intro: typeof category.description === 'string' && category.description ? category.description : undefined,
+        crumbs, seo, languageLinks: keepQuery(alts),
+      } };
+      break;
+    }
+    case 'product': {
+      const product = await provider.getProduct(parsed.param ?? '', req);
+      if (!product) break;
+      const labels = makeLabels(locale, categories);
+      // Benzer ürünler: aynı (sonra üst) kategoride, mevcut olanlar
+      const similar: Product[] = [];
+      const path = product.primaryCategory?.path ?? [];
+      for (const h of [...path].reverse()) {
+        if (similar.length >= SOLD_PRODUCTS.similarAvailableCount) break;
+        const r = await provider.listProducts({ category: h, stock: 'available', sort: 'newest', pageSize: 12 }, req);
+        for (const s of r.items) if (s.handle !== product.handle && !similar.some((x) => x.handle === s.handle)) similar.push(s);
+      }
+      const price = ctx.price(product.price);
+      const alts = alternatesFor('product', product.handle);
+      const crumbs = [home, ...crumbFor(path), { name: product.title, href: ctx.path('product', product.handle) }];
+      const rows = labels.specRows(product);
+      const facts = rows.filter((r) => r.name !== t.product.attr.sku).slice(0, 4).map((r) => `${r.name}: ${r.value}`).join(', ');
+      const seo: SeoInput = {
+        title: product.sku ? `${product.title} (${product.sku})` : product.title,
+        description: truncate(fmt(t.seo.productDesc, { title: product.title, facts: facts ? `${facts}. ` : '', price: price.text, stock: product.available ? t.product.inStock : t.product.sold })),
+        path: ctx.path('product', product.handle),
+        alternates: alts,
+        type: 'product',
+        image: product.images[0] ? { url: product.images[0].url, width: product.images[0].width, height: product.images[0].height, alt: product.images[0].alt } : undefined,
+        jsonLd: [
+          productLd(ctx.env, product, { path: ctx.path('product', product.handle), price, locale, attributes: rows.map(({ name, value }) => ({ name, value })) }),
+          breadcrumbLd(ctx.env, crumbs.map((c) => ({ name: c.name, path: c.href! }))),
+        ],
+      };
+      if (!product.available) Astro.response.status = SOLD_PRODUCTS.soldHttpStatus;
+      render = { view: 'product', props: { product, similar: similar.slice(0, SOLD_PRODUCTS.similarAvailableCount), labels, crumbs, seo, languageLinks: alts } };
+      break;
+    }
+    case 'cart':
+      render = { view: 'cart', props: {} };
+      break;
+    case 'favorites': {
+      // Favoriler tarayıcıda saklanır; statik sayfada liste istemci tarafından doldurulur
+      render = { view: 'favorites', props: { products: [] } };
+      break;
+    }
+    case 'about': case 'contact': case 'faq': case 'shipping': case 'returns':
+    case 'privacy': case 'distanceSales': case 'preInfo': case 'kvkk': case 'cookies': case 'terms':
+      render = { view: 'content', props: { page: parsed.key } };
+      break;
+  }
+} catch (e) {
+  if (e instanceof DataSourceError) {
+    console.error('[veri kaynağı]', e.kind, e.message);
+    Astro.response.status = 503;
+    Astro.response.headers.set('Retry-After', '120');
+    render = { view: 'error', props: { detail: ctx.env.deployEnv !== 'production' ? e.message : undefined } };
+  } else {
+    throw e;
+  }
+}
+if (render.view === '404') Astro.response.status = 404;
+const P = render.props as any;
+---
+{render.view === 'home' && <HomeView ctx={ctx} categories={categories} {...P} />}
+{render.view === 'listing' && <ListingView ctx={ctx} categories={categories} {...P} />}
+{render.view === 'product' && <ProductView ctx={ctx} categories={categories} {...P} />}
+{render.view === 'cart' && <CartView ctx={ctx} categories={categories} />}
+{render.view === 'favorites' && <FavoritesView ctx={ctx} categories={categories} {...P} />}
+{render.view === 'content' && <ContentView ctx={ctx} categories={categories} {...P} />}
+{render.view === '404' && <StatusView ctx={ctx} categories={categories} kind="404" />}
+{render.view === 'error' && <StatusView ctx={ctx} categories={categories} kind="error" {...P} />}

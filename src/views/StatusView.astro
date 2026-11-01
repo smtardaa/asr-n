@@ -1,0 +1,25 @@
+---
+/** 404 ve veri kaynağı hata sayfası (HTTP durum kodunu yönlendirici ayarlar). */
+import Base from '../layouts/Base.astro';
+import type { Category } from '../lib/data/types';
+import type { PageCtx } from '../lib/page';
+import { alternatesFor } from '../i18n';
+
+interface Props { ctx: PageCtx; categories: Category[]; kind: '404' | 'error'; detail?: string }
+const { ctx, categories, kind, detail } = Astro.props;
+const { t } = ctx;
+const title = kind === '404' ? t.notFound.title : t.errors.dataTitle;
+const seo = { title, description: kind === '404' ? t.notFound.text : t.errors.dataText, path: ctx.url.pathname, noindex: true };
+---
+<Base ctx={ctx} seo={seo} categories={categories} languageLinks={alternatesFor('home')}>
+  <section class="container status-page">
+    <p class="code" aria-hidden="true">{kind === '404' ? '404' : '503'}</p>
+    <h1>{title}</h1>
+    <p class="muted">{kind === '404' ? t.notFound.text : t.errors.dataText}</p>
+    {detail && <p class="notice notice-error" style="max-width:640px;margin:16px auto;text-align:left">{detail}</p>}
+    <p style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px">
+      <a class="btn btn-primary" href={ctx.path('home')}>{t.notFound.home}</a>
+      {kind === '404' && <a class="btn btn-outline" href={ctx.path('search')}>{t.notFound.search}</a>}
+    </p>
+  </section>
+</Base>
